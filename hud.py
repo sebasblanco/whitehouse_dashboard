@@ -1,6 +1,11 @@
-from PyQt5.QtWidgets import QApplication,QLabel,QWidget,QGridLayout
-from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QApplication,QLabel,QWidget,QGridLayout,QRadioButton
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtCore import QTimer,QUrl
 from datetime import datetime
+import pandas as pd
+
+df = pd.read_excel("database.xlsx")
+article_url = df['URL']
 
 class Event:
     def __init__(self, date: datetime, title: str, description: str):
@@ -8,26 +13,12 @@ class Event:
         self.title = title        # Title of the event
         self.description = description  # Description of the event
 
-class Article:
-    def __init__(self, thumbnail: str, url: str):
-        self.thumbnail = thumbnail  # URL of the article thumbnail
-        self.url = url              # URL of the article
-
 class Timeline:
     def __init__(self):
         self.events = []           # List to hold Event objects
 
     def add_event(self, event: Event):
         self.events.append(event)  # Method to add an event to the timeline
-
-class DateTime:
-    def __init__(self, year: int, month: int, day: int, hour: int, minute: int, second: int):
-        self.year = year           # Year of the event
-        self.month = month         # Month of the event
-        self.day = day             # Day of the event
-        self.hour = hour           # Hour of the event
-        self.minute = minute       # Minute of the event
-        self.second = second       # Second of the event
 
 class HUDDashboard(QWidget):
     def __init__(self):
@@ -59,16 +50,20 @@ class HUDDashboard(QWidget):
 
     # Create right sidebar
         # Headlines
-        self.headline1_label = QLabel('Headline 1')
-        grid_layout.addWidget(self.headline1_label, 1, 1)
-        self.headline2_label = QLabel('Headline 2')
-        grid_layout.addWidget(self.headline2_label, 1, 2)
-        self.headline3_label = QLabel('Headline 3')
-        grid_layout.addWidget(self.headline3_label, 2, 1)
-        self.headline4_label = QLabel('Headline 4')
-        grid_layout.addWidget(self.headline4_label, 2, 2)
-        for i, headline_label in (enumerate([self.headline1_label, self.headline2_label, self.headline3_label, self.headline4_label])):
-            headline_label.setStyleSheet("color: white; font-size: 16px; border: 1px solid #008080;")  # Arrange in 2x2 grid
+        self.headline1 = QWebEngineView()
+        self.headline1.setUrl(QUrl(article_url[0]))
+        grid_layout.addWidget(self.headline1, 1, 1)
+        self.headline2 = QWebEngineView()
+        self.headline2.setUrl(QUrl(article_url[1]))
+        grid_layout.addWidget(self.headline2, 1, 2)
+        self.headline3 = QWebEngineView()
+        self.headline3.setUrl(QUrl(article_url[2]))
+        grid_layout.addWidget(self.headline3, 2, 1)
+        self.headline4 = QWebEngineView()
+        self.headline4.setUrl(QUrl(article_url[3]))
+        grid_layout.addWidget(self.headline4, 2, 2)
+        for i, headline in (enumerate([self.headline1, self.headline2, self.headline3, self.headline4])):
+            headline.setStyleSheet("color: white; font-size: 16px; border: 1px solid #008080;")  # Arrange in 2x2 grid
         
         # Videos
         self.videos_label = QLabel('Videos / Highlights')
@@ -88,5 +83,7 @@ class HUDDashboard(QWidget):
             layout.addWidget(event_label, 2 + i, 0)  # Place events below the upcoming events label
 
     def updateDateTime(self):
-        current_time = "Current Date and Time: " + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        current_time = "Today's Date and Time: " + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self.date_time_label.setText(current_time)
+
+   
